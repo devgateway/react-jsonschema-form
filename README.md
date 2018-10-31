@@ -23,6 +23,7 @@ A [live playground](https://mozilla-services.github.io/react-jsonschema-form/) i
         - [Form data changes](#form-data-changes)
         - [Form field blur events](#form-field-blur-events)
         - [Form field focus events](#form-field-focus-events)
+     - [Submit form programmatically](#submit-form-programmatically)
   - [Form customization](#form-customization)
      - [The uiSchema object](#the-uischema-object)
      - [Alternative widgets](#alternative-widgets)
@@ -59,6 +60,7 @@ A [live playground](https://mozilla-services.github.io/react-jsonschema-form/) i
      - [Field labels](#field-labels)
      - [HTML5 Input Types](#html5-input-types)
      - [Form attributes](#form-attributes)
+     - [Form disable](#form-disable)
   - [Advanced customization](#advanced-customization)
      - [Field template](#field-template)
      - [Array Field Template](#array-field-template)
@@ -239,6 +241,22 @@ Sometimes you may want to trigger events or modify external state when a field h
 #### Form field focus events
 
 Sometimes you may want to trigger events or modify external state when a field has been focused, so you can pass an `onFocus` handler, which will receive the id of the input that is focused and the field value.
+
+### Submit form programmatically
+You can use the reference to get your `Form` component and call the `submit` method to submit the form programmatically without a submit button.
+This method will dispatch the `submit` event of the form, and the function, that is passed to `onSubmit` props, will be called.
+
+```js
+const onSubmit = ({formData}) => console.log("Data submitted: ",  formData);
+let yourForm;
+
+render((
+  <Form schema={schema}
+        onSubmit={onSubmit} ref={(form) => {yourForm = form;}}/>
+), document.getElementById("app"));
+
+yourForm.submit();
+```
 
 ## Form customization
 
@@ -881,7 +899,28 @@ The `Form` component supports the following html attributes:
   schema={} />
 ```
 
+### Form disable
+
+Its possible to disable the whole form by setting the `disabled` prop. The `disabled` prop is then forwarded down thru each field of the form. 
+
+```jsx
+<Form
+  disabled
+  schema={} />
+```
+
+If you just want to disable some of the fields see the `ui:disabled` parameter in the uiSchema directive. 
+
 ## Advanced customization
+
+
+_ | Custom Field  | Custom Template | Custom Widget
+--|---------- | ------------- | ----
+What it does | Overrides all behaviour | Overrides just the layout | Overrides just the input box (not layout, labels, or help, or validation)
+Usage | Global or per-field | Only global | Global or per-field
+Global Example | `<Form fields={MyCustomFields} />` |  `<Form ArrayFieldTemplate={ArrayFieldTemplate} />` | `<Form widgets={MyCustomWidgets} />`
+Per-Field Example | `"ui:field": MyField` |  N/A | `"ui:widget":MyWidget`
+Documentation | [Field](#field-props) | [Field Template](#field-template) - [Array Template](#array-field-template) - [Object Template](#object-field-template) - [Error List Template](#error-list-template) | [Custom Widgets](#custom-widget-components)
 
 ### Field template
 
@@ -1001,7 +1040,7 @@ function ObjectFieldTemplate(props) {
     <div>
       {props.title}
       {props.description}
-      {props.properties.map(element => <div className="property-wrapper">{element.children}</div>)}
+      {props.properties.map(element => <div className="property-wrapper">{element.content}</div>)}
     </div>
   );
 }
